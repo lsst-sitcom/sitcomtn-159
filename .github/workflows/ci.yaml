@@ -38,4 +38,4 @@ jobs:
           LTD_PASSWORD: ${{ secrets.LTD_PASSWORD }}
           LTD_USERNAME: ${{ secrets.LTD_USERNAME }}
         run: |
-          lander --upload --pdf SITCOMTN-159.pdf --lsstdoc SITCOMTN-159.tex --ltd-product sitcomtn-159
+          lander --upload --pdf SITCOMTN-159.pdf --author "Tom J. Wilson" --author "Tim Naylor" --lsstdoc SITCOMTN-159.tex --ltd-product sitcomtn-159
