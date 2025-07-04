@@ -8,5 +8,4 @@
 
 RA:Right Ascension
 Dec:Declination
-AUF:Astrometric Uncertainty Function
 OR3:Operations Rehearsal 3
