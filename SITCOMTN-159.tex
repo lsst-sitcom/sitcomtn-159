@@ -35,16 +35,19 @@
 % \setDocCurator{The Curator of this Document}
 
 \setDocAbstract{%
-We carry out an initial investigation into the LSST Pipelines astrometric accuracy and precision using the Operations Rehearsal 3 dataset.
-For each of the available simulated tracts we create distributions of nearest-neighbour match on-sky separations to the simulation's truth table for narrow windows of magnitude, pipeline-derived astrometric precision, and (where appropriate) on-sky source density.
-For a series of such cross-matches -- across a range of magnitudes and hence signal-to-noise ratios -- for the \texttt{Source} table, single-visit detections, we derive best-fit parameters such that we can derive astrometric uncertainties that match the separation distributions.
-Fitting for both a systematic uncertainty $n$, to be added in quadrature to the pipeline uncertainty, and a multiplicative scaling factor for the quoted precisions $m$, we find, globally, that scaling factors are unnecessary ($m \approx 1\pm0.1$), but that a systematic astrometric uncertainty of $n$ in the range 0.003-0.007 arcsec (3-7 mas) should be included, with a weak decreasing relationship with increasing field density.
+We carry out an investigation into the veracity of the astrometric uncertainties calculated by the LSST pipeline.   
+We use the Operations Rehearsal 3 dataset, and thus our results study the effect of the pipeline alone.  
+Whilst there are regimes in which the pipeline astrometric uncertainties are a good estimate of the true uncertainty, there are also regimes in which they are underestimated, and one regime where they are overestimated.
+
+Our analysis is based on creating distributions of separations between detections in the simulation's truth table and their counterparts in the pipeline's data tables for narrow windows of magnitude, pipeline-derived astrometric precision, and (where appropriate) on-sky source density.
+From these distributions we can derive the actual uncertainties in these windows, and hence derive relationships between our measured uncertainties, and those provided by the pipeline.
+For the \texttt{Source} table, single-visit detections we find there is a systematic uncertainty of 0.003-0.007 arcsec (3-7 mas) which has to be added in quadrature to the pipeline uncertainty, with a weak decreasing relationship with increasing field density.
 This suggests that at fainter magnitudes (lower signal-to-noise ratios) the pipeline is correctly modelling all contributions to astrometric uncertainty, and that the deviations from ``true'' position are accurately reflected in the corresponding confidence in the measured position.
-For the very brightest objects a small -- but significant relative to the statistical uncertainty -- astrometric precision is not being recovered, from sources such as the global World Coordinate System solution, missing sources of noise not being propagated through the full pipeline, and so on.
-On the other hand, for \texttt{Object} table, coadded image detections, this simple scaling relation does not hold.
-Instead we find a power-law fit between pipeline-derived and best-fit astrometric precisions, with a power-law slope of approximately 0.75, the origin of which we are unable to explain easily.
-Combining all simulated pointings we find a very tentative sub-arcsecond (0.6 mas) systematic plateauing astrometric precision for the Operations Rehearsal \texttt{Object} tables.
-We however caution that these results are relatively limited, due to the nature of the simulated fields chosen as part of the Operations Rehearsal, and that further investigations on ``real'' commissioning data -- including fields with a higher density of (stellar) objects -- will be necessary to determine the universality of these conclusions.
+For the very brightest objects a small -- but significant relative to the statistical uncertainty -- source of astrometric noise is not being included in the pipeline uncertainties, perhaps from sources such as the global World Coordinate System solution, or missing sources of noise not being propagated through the full pipeline.
+On the other hand, for \texttt{Object} table, coadded image detections, this simple model does not hold.
+Instead we find a power-law relationship between pipeline-derived and measured astrometric precisions, with a power-law slope of approximately 0.75, the origin of which we are unable to explain easily.
+Combining all simulated pointings, we find a very tentative sub-arcsecond (0.6 mas) plateau of best-achieved astrometric precision for Operations Rehearsal 3 \texttt{Object} tables.
+We however caution that these results are relatively limited, due to the nature of the simulated fields chosen for the Operations Rehearsal, and that further investigations on ``real'' commissioning data -- including fields with a higher density of (stellar) objects -- will be necessary to determine the universality of these conclusions.
 }
 
 % Change history defined here.
@@ -52,7 +55,7 @@ We however caution that these results are relatively limited, due to the nature 
 % Fields: VERSION, DATE, DESCRIPTION, OWNER NAME.
 % See LPM-51 for version number policy.
 \setDocChangeRecord{%
-  \addtohist{1}{YYYY-MM-DD}{Unreleased.}{First Last}
+  \addtohist{1}{2025-07-29}{First version of technote.}{Tom J. Wilson}
 }
 
 
@@ -73,56 +76,72 @@ However, we are also able to determine the precision with which we made that mea
 The main task of any astronomical image pipeline is to extract, along with the brightnesses (and corresponding uncertainties) of the objects, these positions and position-measuring precisions of all detected objects, and collate them into a table (or catalogue, database, etc.) for use by astronomers.
 
 For a large range of analyses in astronomy, but especially for the task of performing cross-matches from these catalogues of objects to other datasets, containing the positions and brightnesses of objects detected by other telescopes or surveys, it is important that the precisions of objects accurately reflect the ``proper'' certainty we have in the object location, and reflect the confidence we have in the true location of the object based on where we recorded it to be.
-Certain algorithms used in the determination of counterpart assignment (e.g. \citealp{Budavari:2008aa}, \citealp{2018MNRAS.473.5570W}, \citealp{Pineau:2017aa}) use the precision of the measurement of the object(s) as well as the location(s) of the object to compute relative likelihoods of two detections, one from each catalogue, being the same object detected twice and separate detections of two real astrophysical objects.
+Well-constructed algorithms for the determination of counterpart assignment (e.g. \citealp{Budavari:2008aa}, \citealp{2018MNRAS.473.5570W}, \citealp{Pineau:2017aa}) should use the precision of the measurement of the object(s) as well as the location(s) of the object to compute relative likelihoods of two detections, one from each catalogue, being the same object detected twice and separate detections of two real astrophysical objects.
 It is therefore crucial that the astrometric measurements and their respective precisions are in alignment, and that the generated catalogues contain both accurate astrometry and reliable astrometric uncertainties.
 
 In this work we perform a preliminary investigation into the accuracy of the astrometry as produced by the LSST Science Pipelines, working with precursor data for the Vera C. Rubin Observatory's Legacy Survey of Space and Time (LSST; \citealp{Ivezic2019}).
 
 \section{Ensemble Astrometric Precisions}
 In isolation, it is quite a difficult task to verify an object's astrometric precision is correct.
-We would ideally compare the separation between the object and the ``ground truth'' position, but we only have one measurement per object, which doesn't give us much insight.
-In any case for catalogues of observations of sky sources we don't know where the objects' true locations are.
-However, we can at least solve the first problem by using the ensemble nature of similar groups of objects.
+We would ideally compare the separation between the object and the ``ground truth'' position, but we only have one such comparison per object, which doesn't give us much insight.
+The solution to this problem is to use groups of similar objects, utilising their ensemble characteristics as a probe into each object individually.
 
-In general, the precisions we wish to verify from our data reduction process are the ``centroid'' precisions -- the measure of the ability we have to pinpoint exactly where on our observations the recorded objects are, independent of other factors that may influence those recorded positions \citep{2017MNRAS.468.2517W,2018MNRAS.481.2148W}.
-Hence, if we are able to find a large number of objects that all have the ``same'' parameters, we can bypass this single-realisation problem.
+In general, the precisions we wish to verify from our data reduction process are the ``centroid'' precisions -- the measure of the ability we have to pinpoint exactly where on our observations the recorded objects are, independent of other factors that may influence those recorded positions \citep{2017MNRAS.468.2517W,2018MNRAS.481.2148W,Wilson2023}.
+Hence, if we are able to find a large number of objects that all have the ``same'' parameters (such as signal-to-noise ratio, SNR), we can bypass this single-realisation problem.
 Once we have done so, we can use these multiple measurements to build an alternative method of determining the precision of these observations.
 
 As an example, let us imagine we had a large number of objects, all with the same precision of position measurement, and we had a measurement of each of those object's positions, subject to some noise (such as photon or shot noise in our exposures).
-If we were able to measure the deviation of each object's measured position from its true position, and produce an array of deviations from true, then we expect that the distribution of these values follow a specific functional form.
+If we were able to measure the deviation of each object's measured position from its true position, and produce an array of deviations from true, then we expect that the distribution of these values follow a specific function.
 In this case, we should see that the number of objects in each small, unit-area region -- say, some $\Delta x$ by $\Delta y$ rectangle in a 2-D plane around the origin, with deviations in e.g. RA and Dec -- should follow a Gaussian distribution.
 In particular, the important parameter that controls the width of the distribution is its standard deviation, $\sigma$, which can be calculated by, in the case of a 1-D variable, $\sigma^2 = \frac{1}{N} \sum_{i=1}^N(x_i - \mu)^2$ with $\mu = \frac{1}{N}\sum_{i=1}^Nx_i$.
-% TODO: expand, maybe add figure (cf. the one from talk slides but with a 2D gaussian density plot on the left?)
 This can equivalently be seen in terms of the number of objects per unit-separation -- thinking in terms of total distance from origin $\Delta r$, some sum-in-quadrature of $x$ and $y$ or RA and Dec -- which, identically, follows a Rayleigh distribution and has exactly the same standard deviation $\sigma$ calculation.
 This is simply an integration of the Gaussian function around 360 degrees, and hence has a scaling relation of $2\pi r \mathrm{d}r$.
-The main visual difference between the two is that, due to this radial-dependence, the Rayleigh distribution vanishes at the origin, as there is simply no area for any objects to be placed in such a small annulus!
+The main visual difference (Figure \ref{fig:gauss_v_ray}) between the two is that, due to this radial-dependence, the Rayleigh distribution vanishes at the origin, as there is simply no area for any objects to be placed in such a small annulus!
 
-This then forms the crux of our validation: if the standard deviation of the pipeline-derived vs true position differences agrees with the pipeline-derived precisions then we can have confidence in both the positions and positional uncertainties.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.95\columnwidth]{{gaussianrayleigh}.pdf}
+  \caption{Schematic showing the difference between the Gaussian and Rayleigh distributions.
+           The left-hand figure shows the typical scatter in measured positions away from some ``true'' (unknown) position, in both sky axes.
+           The right-hand figure shows the mathematical representation of this density, in terms of number of objects per unit area, in the black line, as a Gaussian distribution.
+           Equivalently we can represent this as number of objects per unit distance from the origin, which transforms the function into a Rayleigh distribution, shown in the red line.
+           In essence, as we map from a small sky square to a circular annulus inside which we determine our object counts, the Rayleigh distribution decreases towards the origin due to the decreasing area being considered.}
+  \label{fig:gauss_v_ray}
+\end{figure}
+
+This then forms the crux of our validation: if the standard deviation of the true-position differences agrees with the pipeline-derived precisions then we can have confidence in both the positions and positional uncertainties.
 
 \section{The LSST Science Pipelines and Operations Rehearsal 3}
 \label{sec:pipeline_or3}
-In practice, validating the astrometry of a photometric survey or a particular data release is hard, due to the aforementioned lack of ground-truth observation.
-For such cases we might turn to the incredible precision and accuracy of surveys such as \textit{Gaia} \citep{Collaboration2021} for what amounts, to all intents and purposes, to the ``true'' positions of objects, relative to our own catalogue's precision.
+In practice, validating the astrometry of a photometric survey or a particular data release is hard, due to the lack of ground-truth observation.
+For such cases we might turn to the precision and accuracy of surveys such as \textit{Gaia} \citep{Collaboration2021} for what amounts, to all intents and purposes, to the ``true'' positions of objects, relative to our own catalogue's precision.
 For the moment, however, we can do slightly better than that; Operations Rehearsal 3 (OR3) was a simulation of several nights of the Rubin Observatory's operations, as it is anticipated it will operate during the early part of the LSST.
 Due to this, we, for once, \textit{do} have ground truth observations against which to compare to!
 This allows us to test solely the data-reduction pipeline, removing from our analysis any potential issues with the physical telescope or with our comparison dataset.
 
-We therefore extract all available tracts that were simulated in OR3 through the \texttt{Butler} using \texttt{lsst-scipipe-9.0.0} and the \texttt{intermittentcumulativeDRP/\allowbreak 20240402\_03\_04/\allowbreak d\_2024\_03\_29/DM-43865} collection.
+We extract all available tracts that were simulated in OR3 through the \texttt{Butler} using \texttt{lsst-scipipe-9.0.0} and the \texttt{intermittentcumulativeDRP/\allowbreak 20240402\_03\_04/\allowbreak d\_2024\_03\_29/DM-43865} collection.
 After filtering for tracts with sufficient numbers of sources we are left with 19: tracts 2661, 2662, 3200, 3346, 3384, 3385, 3534, 6914, 6915, 7149, 7683, 7684, 9348, 9590, 9591, 9638, 9812, 9880, and 9881.
 However, we will subsequently filter these down again and will, in the end, be left with six of these tracts (3346, 3384, 6914, 7149, 9590, and 9880) as our main targets of investigation.
-One simulation-specific filter to note is the dither pattern.
+One simulation-specific filter to note is the dither pattern, shown in Figure \ref{fig:n_coadds}.
 Each simulated pointing is a densely dithered field, and hence there are a large, varying number of unique visits at each coordinate for each sky pointing in the dataset created from co-added images that forms the \texttt{Object} table.
-% TODO: check if we have an image for this to point to, otherwise add one to make it clear what we're on about here?
-To avoid issues with our analysis where we could have introduced a disconnect between the magnitude of an observation and its signal-to-noise ratio (SNR), we limit analysis to sources in the \texttt{Object} tables that are in $N\pm10$ visits, with $N$ chosen to be the largest possible number of visits ($N \gtrsim$ 40) while maximising the number of data points.
+To avoid issues with our analysis where we could have introduced a disconnect between the magnitude of an object and its SNR, we limit analysis to sources in the \texttt{Object} tables that are in $N\pm10$ visits, with $N$ chosen to be the largest possible number of visits ($N \gtrsim$ 40) while maximising the number of data points.
 
-Furthermore, we will also combine tracts into ``pointings,'' each separate observing strategy, to investigate the single-visit image pipeline as well as the tract-level coadd pipeline performance.
-This results in eight combined-tract analyses of \texttt{Source} table reductions, all of which, by the larger number of objects available through no longer combining repeated observations, meet the post-filter cuts needed for analysis.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.95\columnwidth]{{n_coadds_i_9880_cutout}.pdf}
+  \caption{Figure showing the number of visits each region of the simulated field of densely dithered observations received, for tract 9880.
+           The inner-most region, covered by all pointings, receives the most observations and hence the deepest coadded depth, while the outer edges have a smaller number of visits.
+           This results in a degeneracy between the brightness of an object and its SNR, which must be accounted for in the determination of astrometric uncertainties as a function of such parameters.}
+  \label{fig:n_coadds}
+\end{figure}
+
+Furthermore, we will perform analysis on the ``pointings,'' each separate observing strategy, to investigate the single-visit image pipeline as well as the tract-level coadd pipeline performance.
+This results in eight ``combined-tract'' analyses of \texttt{Source} table reductions, all of which, by the larger number of objects available through no longer combining repeated observations, meet the post-filter cuts needed for analysis.
 In these cases we refer to sightlines by either coordinate or appropriate description assigned by the Project to the sky regions.
 
 For each tract we load the pipeline-created catalogue and filter for \texttt{NaN} values in flux, flux uncertainty, and the three astrometric uncertainty values (RA, Dec, and covariance between the two).
 We then extract the position coordinates, astrometric uncertainty (circularised by computing the semi-major and semi-minor axes and taking the geometric mean, to reduce our problem to a one-dimensional one).
-We calculate photometric magnitudes and uncertainties by converting flux and flux uncertainty from nano-Janskies to AB magnitudes, propagating uncertainty through $m = - 2.5 \log_{10}(f)$.
-% TODO: cite software -- astropy, healpix etc.?
+We calculate photometric magnitudes and uncertainties by converting flux and flux uncertainty from Nano-Janskys to AB magnitudes, propagating uncertainty through $m = - 2.5 \log_{10}(f)$.
 The truth tables are loaded, for all \texttt{healpix} pixels the tract covers, for the \texttt{pointsource}, \texttt{sso}, and \texttt{galaxy} \texttt{parquet} files, which are then all combined into one table, from which the RA and Dec coordinates are extracted.
 
 In the case of the \texttt{Source} table, we are not able to load a single catalogue in one go, since we now have the repeated observations at each pointing.
@@ -131,22 +150,23 @@ For investigations in these cases, we load, at present, the first $N \approx 15$
 These visits are merged into one large photometric catalogue, although the unique visit ID is kept to ensure that counterpart assignments can be performed on a per-visit basis during analysis, with truth-measured position separations then subsequently combined.
 
 \section{Assessing the Astrometric Precision of OR3}
+\label{sec:assessing_the_or3_precision}
 The first step in assessing the astrometric positions and precisions is to calculate the separations between our two datasets.
 Thus, the pipeline table is cross-matched to the truth table.
-For this, to avoid a cyclical process where we may bias results by using a cross-match algorithm to verify the astrometry that then gets input into our algorithm, we use a nearest-neighbour algorithm.
+For this, to avoid a case where we may bias results by using a cross-match algorithm to verify the astrometry that then gets input into our algorithm, we use the simplest possible match criterion: a nearest-neighbour algorithm.
 Here each object has its on-sky separation computed to every source in the opposing catalogue -- per unique visit ID for the \texttt{Source} table case -- and has selected as its counterpart the source that is the smallest distance away.
 In crowded fields this is very sensitive to false-positive interlopers, so to reduce the effect this may have we calculate nearest-neighbour matches for both datasets, and only select pairs which agree that each other are their closest neighbour.
 This removes from our sample any pairings for which there is disagreement over pairing solutions, but we are more concerned with purity than completeness in generating these samples.
 We use a five-arcsecond maximum cut-off radius, but in practice this is much larger than any separations we report, and as such we are insensitive to this particular parameter.
 
 Next, we generate a series of sub-samples of our dataset, at a series of magnitudes.
-For this we generate samples at intervals of 0.25 magnitudes between 16th and 29th magnitude in the $i$-band -- a lot of these, at the bright and faint ends, won't make our final sample cuts, due to low number counts, but we try them anyway, as higher-density parts of the sky may meet these criteria where other parts do not.
+For this we generate samples in increments of 0.25 magnitudes between 16th and 29th magnitude in the $i$-band -- a lot of these samples, at the bright and faint ends, won't make our final sample cuts, due to low number counts, but we try them anyway, as higher-density parts of the sky may meet these criteria where other parts do not.
 Here we are largely using magnitude as a proxy for signal-to-noise ratio, to probe different regimes within the photometric images.
-For each magnitude (SNR) in turn, we select objects within 0.05 magnitude (i.e., $m\pm0.05$), as well as selecting objects in a small range (0.02 arcseconds) of uncertainty around the mode of the pipeline astrometric precision distribution, determined on a case-by-case basis.
+For each magnitude (SNR) in turn, we select objects within 0.05 magnitude (i.e., $m\pm0.05$ for $m$ in \{16, 16.25, 16.5, 16.75, ...\}), as well as selecting objects in a small range (0.02 arcseconds) of uncertainty around the mode of the pipeline astrometric precision distribution for objects within the magnitude cut, determined on a case-by-case basis.
 
-For these objects -- all of which have the same magnitude and hence SNR, and same apparent astrometric precision -- we calculate the histogram of cross-match separations to our truth table.
-To these we first compare the quoted astrometric precision, as well as including any systematic ``deviations from true'' that may be present in the data -- chief of which for LSST will be an effect caused by unresolved contaminants, hidden with a brighter detection, causing perturbations to the maximum-likelihood measurement of its position.
-However, the OR3 data do not show any strong systematic terms, due to the areas of the sky simulated, and hence we do not discuss them any further here; the only important term in the separation between a measured position of an object and its true, simulated position is its pipeline-dependent centroiding.
+For these objects -- all of which have the same magnitude and hence SNR, and are believed to have the astrometric precision -- we calculate the histogram of cross-match separations to our truth table.
+We compare this to the quoted astrometric precision, as well as including any systematic ``deviations from true'' that may be present in the data -- chief of which for LSST will be an effect caused by unresolved contaminants, hidden within a brighter detection, causing perturbations to the maximum-likelihood measurement of its position.
+However, the OR3 data do not show any strong systematics, due to the areas of the sky simulated, and hence we do not discuss them any further here; the only important term in the separation between a measured position of an OR3 object and its true, simulated position is its pipeline-dependent centroiding.
 In addition, to the distribution of ``correct'' counterparts we further add a parameterisation of the false-positive matches that may not have been removed by our simple cross-match algorithm choice.
 These object separations generally follow a much broader distribution, with lengthscales a few times the typical separation between true cross-matches, and are, again, a nuisance parameter that we must account for to improve the robustness of the analysis but are otherwise not discussed further in this work.
 
@@ -154,9 +174,10 @@ These object separations generally follow a much broader distribution, with leng
   \centering
   \includegraphics[width=0.95\columnwidth]{{auf_fits_Rubin_SV_250_2_i18.5ap03}.pdf}
   \caption{Comparison between astrometric precision model and distribution of measured-truth position separations.
-           Black errorbars show the radial separation between pipeline-generated data and simulated positions for $i=18.5$ Sources across the ``Rubin SV'' OR3 pointing at RA = 250 deg, Dec = 2 deg.
-           Black lines show expected distribution of separations based on quoted astrometric precisions, while red and cyan lines show different best-fitting precisions.
-           In this case the quoted astrometric uncertainties, as derived by the pipeline, are too small (black vs red/cyan solid lines).}
+           Black errorbars show the distribution of radial separations between pipeline-generated data and simulated positions for $i=18.5$ Sources across the ``Rubin SV'' OR3 pointing at RA = 250 deg, Dec = 2 deg.
+           The black line shows the expected distribution of separations based on quoted astrometric precisions, while red and cyan lines show different best-fitting distributions.
+           In this case the quoted astrometric uncertainties, as derived by the pipeline, are too small (black vs red/cyan solid lines).
+           $F$ is the fraction of false positives in the best-fit model in each case, while $H$ is a parameter related to the crowding element of the uncertainty function, unimportant in these low-density regions.}
   \label{fig:sv_250_2_ap03_18.5}
 \end{figure}
 
@@ -177,30 +198,30 @@ This trend continues for the ``250, 2'' pointing to its completeness limit of ju
   \label{fig:sv_250_2_ap03_22.75}
 \end{figure}
 
-\begin{figure*}
-  \centering
-  \includegraphics[width=0.95\textwidth]{{summary_individual_sig_vs_sig_source}.pdf}
-  \caption{Comparison between best-fit individual and pipeline-derived precisions.
-           All magnitude slices for each tract are shown, with decreasing brightness tracking towards the top-right of the figures, at lower SNRs.
-           Each tract is overplotted in a separate colour, and the dotted green line shows the line $y = x$.
-           Left-hand panel shows the relationship in a linear-linear plot, while the right-hand panel shows the scaling on a log-log scale.}
-  \label{fig:ind_sig-sig_source}
-\end{figure*}
-
 Figure \ref{fig:ind_sig-sig_source} summarises these results, plotting the individually derived astrometric precision that best fits the cross-match residuals against the pipeline-derived astrometric precision for the detections.
-Here, more obvious in the logarithmic-scale panel, we can see good agreement, and robust quoted astrometric precisions, across all pointings at faint magnitudes (larger uncertainties, top-right of the panel).
+Here, emphasised by the logarithmic scaling, we can see good agreement, and robust quoted astrometric precisions, across all pointings at faint magnitudes (larger uncertainties, top-right of the panel).
 However, we see systematic floors to the precisions for bright objects (towards the left of the panel).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.95\textwidth]{{summary_individual_sig_vs_sig_source_loglog}.pdf}
+  \caption{Comparison between best-fit individual and pipeline-derived precisions.
+           All magnitude slices for each tract are shown, with decreasing brightness tracking towards the top-right of the figure, at lower SNRs.
+           Each tract is overplotted in a separate colour, with uncertainties shown on a log-log scale.
+           The dotted green line shows the line $y = x$.}
+  \label{fig:ind_sig-sig_source}
+\end{figure}
 
 \subsubsection{Calculating Astrometric Precision Correction Factors}
 Although we quote the so-called ``best-fit'' astrometric precision for a single magnitude slice in Figures \ref{fig:sv_250_2_ap03_18.5} and \ref{fig:sv_250_2_ap03_22.75}, we do not necessarily want to derive these on a per-tract-and-magnitude combination basis.
-We could instead generate the probability density functions (PDFs) for all magnitude (SNR) slices for a given tract or pointing, and then fit for the relationship between quoted precisions -- with each magnitude slice having a single, shared precision -- and the best-fit precisions.
+We could instead generate the probability density functions (PDFs) for all magnitude (SNR) slices for a given tract or pointing, and then fit for the relationship between quoted precisions (as a function of magnitude) and the best-fit precisions.
 We choose to model this as $\sigma_\mathrm{fit} = \sqrt{(m \sigma_\mathrm{quoted})^2 + n^2}$, where $n$ is a systematic astrometric precision that may be missing from the quoted precisions, which has its largest impact at bright magnitudes, and $m$ is a multiplicative factor to correct for over- or under-estimation of the quoted precision, dominating the faint-end of the dynamic range probed.
 By inspection of Figure \ref{fig:ind_sig-sig_source} this looks to be a good parameterisation of the relationship between best-fit and quoted astrometric precisions as a function of magnitude.
 However, you could choose any parameterisation that makes sense -- an equivalent two-parameter model that we could investigate might be $\sigma_\mathrm{fit} = a \sigma_\mathrm{quoted} + b$, in which we parameterise a linear, instead of quadratic, fit.
 To limit degeneracies between $m$ and $n$ for small numbers of bins, we require any tract that we derive parameterisations for have five magnitude slices; ideally we should be able to robustly determine $n$ from bright and $m$ from faint objects in our dynamic range.
 
 In Figures \ref{fig:sv_250_2_ap03_18.5} and \ref{fig:sv_250_2_ap03_22.75}, in addition to the best-fit parameterisation for solely that magnitude slice within the given tract, we also show the best fit ``hyper-parameter'' result (red line).
-In this particular case, for the ``SV 250 2'' pointing, we find $m = 1.0052$ and $n = 0.0047\,\mathrm{arcsec}$, or a roughly constant quoted-fit astrometric precision at faint magnitudes (where $n$ is swamped by lower SNRs and higher relative image noise), and a $\approx$5 mas systematic floor to the uncertainties at bright magnitudes.
+In this particular case, for the ``SV 250 2'' pointing, we find $m = 1.0052$ and $n = 0.0047\,\mathrm{arcsec}$, showing the quoted astrometric precision is ``correct'' -- position scatter and pipeline-calculated covariances are in agreement -- at faint magnitudes (where $n$ is swamped by lower SNRs and higher relative image noise), and a $\approx$5 mas systematic floor to the uncertainties at bright magnitudes.
 Figure \ref{fig:mn_source} summarises these results for all tracts.
 
 \begin{figure*}
@@ -218,18 +239,17 @@ $m$, the multiplicative factor in our functional relationship, varies from 0.96 
 As also shown in Figure \ref{fig:mn_source}, there is tenative evidence for a relationship between these hyper-parameters and on-sky density, although this is driven by only a few high-density pointings, and thus more data will be needed to understand whether this is a real effect.
 
 \subsubsection{\texttt{Source} Table Astrometry}
-Preliminary evaluation of the pipeline's ability to determine the positions and corresponding uncertainties -- solely considering the precision with which the centroid was measured, dependent largely on the noise in the relevant image pixels -- for the \texttt{Source} table is positive.
-The main conclusions are that a quadratic fit, systematic bright uncertainty combined with a scaled version of the quoted astrometric precision, produces good fits for all dynamic ranges of all sightlines.
-These parameterisations suggest that the main missing component of centroid uncertainty is a $\approx$5 mas systematic that should be accounted for.
-If the systematic is not included, the astrometric precisions of bright objects, above an SNR of approximately 100, would be over-estimated as compared to the scatter of their centroid measurements.
-On the other hand, at fainter magnitudes where this systematic is less dominant, we have good agreement between uncertainty and position-measurement scatter, suggesting that the pipeline is correctly determining the ``statistical'' uncertainty for these objects.
+Our evaluation of the pipeline’s ability to determine the positions and corresponding uncertainties for the \texttt{Source} table (i.e. single visits) is positive, with the caution that we are solely considering the precision with which the centroid was measured which is dependent largely on the noise in the relevant image pixels.
+The main problem is that the pipeline appears to introduce a $\approx5\,$mas systematic uncertainty which is not accounted for in the quoted uncertainties.
+As this systematic is not included, the astrometric precisions of bright objects, above an SNR of approximately 100, are over-estimated as compared to the scatter of their centroid measurements.
+On the other hand, at fainter magnitudes where this systematic is less dominant, we have good agreement between uncertainty and position-measurement scatter, suggesting that the pipeline is correctly determining the statistical uncertainty for these objects.
 However, we require further data, either observations or simulations, in more dense (stellar) fields to determine the validity of the $\approx$15-20\% underestimation of low-SNR uncertainties in the most-crowded fields simulated.
 
 \subsection{Pipeline Performance For The \texttt{Object} Table}
-As discussed previously (\ref{sec:pipeline_or3}), there are two different versions of each catalogue that the LSST pipeline will produce: the per-visit, time-series-enabling \texttt{Source} table, and the deep-stack, coadd \texttt{Object} table.
+As discussed previously (Section \ref{sec:pipeline_or3}), there are two different versions of each catalogue that the LSST pipeline will produce: the per-visit, time-series-enabling \texttt{Source} table, and the deep-stack, coadd \texttt{Object} table.
 It is important to verify the results of both catalogues, as there are key differences, and additional steps, that go into each reduction.
 \texttt{Source} table reductions are performed on each image separately, and hence there is no potential for the stacking of images to degrade the quality of the resultant catalogue, or create unforeseen issues.
-On the other hand, the \texttt{Object} table will probe much fainter -- at 10-year depths, approximately 3.5 magnitudes for the ``Wide-Fast-Deep''-cadence portions of the survey \citep{Ivezic2019} -- and therefore we can investigate the performance of the pipeline in much more crowded skies, relatively speaking.
+On the other hand, the \texttt{Object} table will probe much fainter -- at 10-year depths, approximately three magnitudes for the ``Wide-Fast-Deep''-cadence portions of the survey \citep{Ivezic2019} -- and therefore we can investigate the performance of the pipeline in much more crowded skies, relatively speaking.
 
 The process, apart from the method by which we assemble our dataset for comparison to ``truth,'' is very similar.
 Instead of full pointings, we now have to analyse the sky as broken down into its tracts.
@@ -237,14 +257,16 @@ Here, we often have a tract that contains a few edges of visits, and hence very 
 
 An example, similar to Figure \ref{fig:sv_250_2_ap03_22.75}, is given in Figure \ref{fig:3384_ap03_22.5} for the case of the \texttt{Object} table, tract 3384, for $i=22.5$.
 Our best-fit individual astrometric precision (cyan line) is in good agreement with the scatter of cross-match separations.
-Similar to the \texttt{Source} table case, our quoted precision (black line) is slightly underestimated, suggesting a small missing systematic component to the astrometric precisions.
+Similar to the \texttt{Source} table case, the quoted precision (black line) slightly under-estimates the measured value, suggesting a small missing systematic component to the astrometric precisions.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.95\columnwidth]{{auf_fits_3384_i22.5ap03}.pdf}
   \caption{Comparison between astrometric precision model and distribution of measured-truth position separations.
            All symbols and lines have the same meaning as Figure \ref{fig:sv_250_2_ap03_18.5}.
-           \texttt{Object} table analysis is now shown, however, for $i=22.5$ detections in tract 3384.}
+           \texttt{Object} table analysis is now shown, however, for $i=22.5$ detections in tract 3384.
+           Dashed lines represent the cases of $H=0$ and $H=1$, visible in the \texttt{Object} table coadd images, unlike the \texttt{Source} table single-visit analyses, with the resulting increase in depth and hence relative crowding.
+           However, their narrow range indicates that crowding is not a significant element of the uncertainty in astrometry at these sky coordinates.}
   \label{fig:3384_ap03_22.5}
 \end{figure}
 
@@ -256,17 +278,6 @@ Similar to the \texttt{Source} table case, our quoted precision (black line) is 
   \label{fig:3384_ap03_25.75}
 \end{figure}
 
-\subsubsection{\texttt{Object} Table Quadratic-Fit Precision Breakdown}
-However, as shown in Figure \ref{fig:3384_ap03_25.75}, we see a reversal of what we the previous \texttt{Source} table faint-magnitude results.
-Now the individual-slice best-fit precision is smaller than the quoted pipeline value.
-This is fainter than the single-visit completeness limit, so beyond the scope of comparison with the \texttt{Source} table results.
-
-This results in a quadratic-fit scaling relation breakdown; however, this has a relatively simple explanation.
-Across all magnitude slices, the simultaneous maximum-likelihood fit will be driven by where there is more information, with higher number counts in the middle of our dynamic range, $23 \lesssim i \lesssim 24.5$.
-Here, the agreement between quoted astrometric precision and cross-match separations is good, and thus $m \approx 1$.
-However, at fainter magnitudes than $i=24.5$, this overturn in standard deviation vs Gaussian-$\sigma$ cannot be accounted for in our simple model, and thus the hyper-parameter best fit (red line) is simply unable to explain these 25th-magnitude position measurements.
-At this point we can see that the simplistic two-parameter model is unfit to describe the dependency between astrometric position scatter and pipeline-derived covariance, so we return to the individual-slice precisions.
-
 \begin{figure*}
   \centering
   \includegraphics[width=0.95\textwidth]{{summary_individual_sig_vs_sig_object}.pdf}
@@ -275,11 +286,14 @@ At this point we can see that the simplistic two-parameter model is unfit to des
   \label{fig:ind_sig-sig_object}
 \end{figure*}
 
-\subsubsection{\texttt{Object} Table Individual-Fit Precision Breakdown}
-The relationship between the pipeline-derived astrometric precision and single-slice precision is less easy to explain.
+\subsubsection{\texttt{Object} Table Precision Breakdown}
+However, as shown in Figure \ref{fig:3384_ap03_25.75}, the individual-slice, best-fit precision is smaller than the quoted pipeline value at faint magnitudes.
+This is fainter than the single-visit completeness limit, and so beyond the scope of comparison with the \texttt{Source} table results.
+This relationship between the pipeline-derived astrometric precision and single-slice precision is less easy to explain.
+
 Figure \ref{fig:ind_sig-sig_object} shows the summary of all individually fit precisions, for all magnitude slices, across all tracts.
-Here, the breakdown of the connection between pipeline-derived uncertainties and the scatter in measured positions can clearly be seen, across all sky regions.
-More clearly visible in the right-hand figure panel, instead of our expected sum-in-quadrature model of systematic precision and scaled-pipeline precision, we see a power law fit, $y = A x^k$, with $A \approx 0.38$, $k \approx 0.75$, across all tracts analysed.
+Here, the breakdown of the connection between pipeline-derived uncertainties and the scatter in measured positions can clearly be seen, consistent across all sky regions.
+More clearly visible in the log-log scaling of the right-hand figure panel, instead of our expected sum-in-quadrature model of systematic precision and scaled-pipeline precision, we see a power law fit, $y = A x^k$, with $A \approx 0.38$, $k \approx 0.75$, across all tracts analysed.
 
 We are currently unable to explain this power-law scaling relation between the coadd, \texttt{Object} table uncertainty as determined by the LSST pipeline and the precision that best accounts for the position scatter distribution.
 
@@ -288,20 +302,20 @@ We do not see the same evidence of a systematic ``plateau'' in \texttt{Object} t
 This is largely due to a lack of available data points at brighter magnitudes, due to the reduced number of observations without repeated measurements of the same bright source.
 Thus, to obtain better number statistics for these crucial magnitudes we performed a second analysis on the \texttt{Object} table data, in which we simply combined all eight previously analysed tracts together.
 
-In our first attempt we continued to do exactly the same method as previously described, binning cross-match pair separations by small ranges in astrometric precision and magnitude.
+In our first attempt we used exactly the same method as previously described, binning cross-match pair separations by small ranges in astrometric precision and magnitude.
 However, this gave poor results due to the varying magnitude-SNR parameterisation across the sky -- with each tract having different sky backgrounds, for example.
 We therefore chose to perform a more rudimentary, but still elucidating, test on these tract-merged data.
 
-Working purely in SNR, we iterated in even spacings of log-SNR, from 0.5 (SNR of $\approx3$) to 4 (SNR of 10,000).
+Working purely in SNR, we iterated in even spacings of log$_{10}$-SNR, from 0.5 (SNR of $\approx3$) to 4 (SNR of 10,000).
 All objects, regardless of magnitude, astrometric precision, local crowding density, etc., were selected in the range from 0.9 to 1.1 times the particular SNR, to account for the logarithmic nature of the selection.
-The fully parameterised model for false matches was still used, although the functional form of the uncertainties was assumed to be Gaussian, as previously shown to be a valid assumption in this case.
-Once the false positives were accounted for, in a similar fashion to the previous analyses, the quoted and best-fit precisions were compared, as shown in Figure \ref{fig:ind_sig-sig_merged_object}.
+The fully parameterised model for false matches was still used (see Section \ref{sec:assessing_the_or3_precision}), although the functional form of the uncertainties was assumed to be Gaussian, as previously shown to be a valid assumption in this case, with the more-complex systematic uncertainty terms not modelled.
+Once the false positives were accounted for, the quoted and best-fit precisions were compared, as shown in Figure \ref{fig:ind_sig-sig_merged_object}.
 
-Here, with roughly eight times as many objects in our dynamic range, we extract good number statistics in our plots to much brighter magnitudes and higher SNRs, with an SNR of 10,000 roughly corresponding to an $i$-band magnitude of 17th.
+Here, with roughly eight times as many objects in our dynamic range as any individual tract analysis, we extract good number statistics in our plots to much brighter magnitudes and higher SNRs, with an SNR of 10,000 roughly corresponding to an $i$-band magnitude of 17th.
 This reveals, brighter than an SNR of around 1,000 ($i \approx 20$), a plateauing of astrometric precision, as expected.
 However, we still do not obtain a linear fit to our astrometric precision dependency at faint magnitudes, and Figure \ref{fig:ind_sig-sig_merged_object} shows a combined-relationship parameterisation, $y = \sqrt{(m x^k)^2 + n^2}$, in which $m \approx 0.31$ and $k \approx 0.73$, similar to the results found in this regime for the individual-tract analyses.
-We find a ``plateau'' systematic of roughly $n=0.6\,\mathrm{mas}$ , an order-of-magnitude decrease on the values obtained for the \texttt{Source} table results.
-These are in back-of-the-envelope agreement, however, as each tract has roughly 80-90 $i$-band visits, in addition to those from other bands that may have gone into the astrometric determinations, and for root-N scaling we need of order 100-150 visits to explain a roughly 10-12 times increase in precision.
+We find a ``plateau'' systematic of roughly $n=0.6\,\mathrm{mas}$, an order-of-magnitude decrease on the values obtained for the \texttt{Source} table results.
+This decrease is in back-of-the-envelope agreement, as each tract has roughly 80-90 $i$-band visits, in addition to those from other bands that may have gone into the astrometric determinations, and for root-N scaling we need of order 100-150 visits to explain a roughly 10-12 times increase in precision.
 
 This combined-tract analysis thus confirms further the power-law dependency of best-fit astrometric precisions (in the form of ensemble astrometric position scatter) on quoted astrometric precisions (covariances as determined by the pipeline on a per-object basis).
 It also provides a ballpark figure for the \texttt{Object} table systematic uncertainties of sub-milliarcsecond precisions for only a few years' effective observation depths.
@@ -317,7 +331,7 @@ It also provides a ballpark figure for the \texttt{Object} table systematic unce
 
 \section{Discussion}
 \subsection{Magnitude-SNR Relationship}
-A separate diagnosis we can perform is a verification of the relationship between magnitude and SNR.
+A separate diagnosis we can perform is a verification of the relationship between magnitude and the pipeline-supplied SNR.
 SNR, defined as the ratio of the flux of the source to its photometric uncertainty, should be tightly correlated with brightness.
 The relations can be verified by investigation of the two extremes: faint objects, where the sky background dominates, and very bright objects where photon-counting statistics should be the majority component.
 
@@ -326,22 +340,22 @@ The relations can be verified by investigation of the two extremes: faint object
   \includegraphics[width=0.95\columnwidth]{{histogram_mag_vs_sig_vs_snr_Rubin_SV_225_-40_mag_snr}.pdf}
   \caption{Verification of the SNR-magnitude relationship, for \texttt{Source} table objects in the ``SV 225 -40'' pointing.
          Background colours show histogram of sources in each magnitude-SNR bin, while black crosses show averages for each ``magnitude slice'' used in precision-verification analysis.
-         Black and red lines respectively show the expected scaling in the bright and faint magnitude limits.}
+         Black and red lines respectively show the expected scaling in the faint and bright magnitude limits.}
   \label{fig:225_-40_mag_snr_scaling}
 \end{figure}
 
-For the sky-background case, we have $m = -2.5 \log_{10}(\mathrm{flux})$ -- for a given definition of ``flux'' and associated zeropoint that we don't need to worry about here -- and $\mathrm{SNR} \propto \mathrm{flux} / B$, where $B$ is some constant background uncertainty.
-Rearranging for flux and plugging into the equation for the magnitude, we get $m = -2.5 \log_{10}(B) - 2.5 \log_{10}(\mathrm{SNR})$.
+For the sky-background-limited case, we have $m = -2.5 \log_{10}(\mathrm{flux})$ -- for a given definition of ``flux'' and associated zeropoint that we don't need to worry about here -- and $\mathrm{SNR} \propto \mathrm{flux} / B$, where $B$ is some constant background uncertainty.
+Rearranging for flux and plugging into the definition of the magnitude, we get $m = -2.5 \log_{10}(B) - 2.5 \log_{10}(\mathrm{SNR})$.
 If, as we show in Figure \ref{fig:225_-40_mag_snr_scaling}, we define $x \equiv -\log_{10}(\mathrm{SNR})$ and $y \equiv m$, then we have, effectively, $y = 2.5 x + C$.
 
 On the other hand, the extremely bright objects will have $\mathrm{SNR} \propto \sqrt{\mathrm{flux}}$, since the uncertainty in flux will scale as the square-root of the flux.
 Now, $m = -2.5 \log_{10}(\mathrm{flux}) = -2.5 \log_{10}(\mathrm{SNR}^2) = -5 \log_{10}(\mathrm{SNR}) = 5 x$.
-Although we did not end up with some scaling parameter $D$ as we did in the sky-background case, we explicitly need to add one, since we don't have any knowledge at this stage of the zeropointing of the magnitudes, and hence simply re-scale our photon-limited case as $y = 5x + D$, such that our brightest data point defines $D$.
+Although we did not end up with some offset parameter $D$ as we did in the sky-background case, we explicitly need to add one, since we don't have any knowledge at this stage of the magnitude zeropoints, and hence simply re-scale our photon-limited case as $y = 5x + D$, such that our brightest data point defines $D$.
 
-Figure \ref{fig:225_-40_mag_snr_scaling} shows the results for a typical case, the \texttt{Source} table for the ``SV 225 -40'' pointing.
+Figure \ref{fig:225_-40_mag_snr_scaling} shows the results for a typical case, the \texttt{Source} table, single-visit objects, for the ``SV 225 -40'' pointing.
 Here we can see that our scaling relations hold at both bright and faint fluxes, with a transition between the two at intermediate SNRs.
 The relationship is also very singular: there is a tight range of recorded SNRs for a given magnitude, or magnitudes measured for a given SNR.
-This both confirms, in a small way, the photometric portion of the LSST Science Pipelines, but also validates our visit cuts made previously.
+This both confirms, in a small way, the photometric portion of the LSST Science Pipelines, at least for the \texttt{ap03} flux, but also validates our visit cuts made previously.
 
 \subsection{Magnitude-Precision Relationship}
 \begin{figure}
@@ -363,25 +377,25 @@ Here we can, essentially, verify the image quality of the observations, as the i
 A few representative seeings are overlaid on Figure \ref{fig:225_-40_snr_sig_scaling}, 0.8 to 1.2 arcsec -- roughly ``good'' to ``below average'' seeing for the Rubin Observatory site -- from which we can tentatively suggest that these particular visits were simulated with seeing on the better end of the range.
 
 \subsubsection{Simulated Seeing and The Effect of Seeing On Astrometric Uncertainty}
-However, also visible in Figure \ref{fig:225_-40_snr_sig_scaling}, are a few stripes of unexplainably poor quality uncertainties for a given SNR.
+However, also visible in Figure \ref{fig:225_-40_snr_sig_scaling} are a few stripes of inexplicably poor quality uncertainties for a given SNR.
 Seen at SNRs of approximately 10, but with astrometric uncertainties of around 0.1 arcsec, we are unable to explain these artefacts in the ensemble data.
 For the \texttt{Source} table analyses, in which a set of individual visits were combined, a plausible if perhaps unlikely explanation is that one or two visits had simulated an unusually large seeing, perhaps to emulate poor weather conditions.
 In these cases, it is likely that detections would be pushed to lower SNRs as well as correspondingly higher position uncertainties, resulting in a few of these ``ghost'' relationships in our ensemble data.
 
-However, we also see these stripes in the \texttt{Object} table, coadd catalogues, at SNRs of greater than 100 with astrometric precisions of order 0.01 arcsec, for a seeing of approximately 2.5 arcsec.
+However, we also see these stripes in the \texttt{Object} table coadd catalogues (see Figure \ref{fig:9880_snr_sig_scaling}), at SNRs of greater than 100 with astrometric precisions of order 0.01 arcsec, for a seeing of approximately 2.5 arcsec.
 Since these data are derived from the deep-stack images, it seems less likely that we would obtain detections solely from such poor-quality imaging, if such a high seeing was even simulated.
 Given the ghost-relationships appear in both coadd and single-visit images, we simply highlight them here for further potential investigation, and conclude that the \textit{overall} relationship between SNR and statistical astrometric precision is robust in the OR3 data.
 
 \subsection{Position Scatter vs. Centroid Uncertainty}
 We reported in the previous section the changes required to update the pipeline-quoted astrometric precisions to bring them into alignment with the scatter in repeat measurement of the positions of detections.
 However, especially in the case of the \texttt{Object} table results, we should emphasise that the conclusions may be made backwards.
-While the conclusion can certainly be made that there is \textit{tension} between the positions and corresponding uncertainties in these first-look data, we have implicitly trusted the maximum-likelihood positions more than the second-order information in the covariance matrix.
+While the conclusion can certainly be made that there is \textit{tension} between the positions and corresponding uncertainties in these simulated data, we have implicitly trusted the maximum-likelihood positions more than the second-order information in the covariance matrix.
 It could in fact be the case that the quoted coadd astrometric uncertainties are good, and there is some issue affecting the pipeline-derived coordinates of those objects.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.95\columnwidth]{{histogram_mag_vs_sig_vs_snr_9880_snr_sig}.pdf}
-  \caption{Astrometric precision-magnitude relationship, for \texttt{Object} table objects in tract 9980.
+  \caption{Astrometric precision-magnitude relationship, for \texttt{Object} table objects in tract 9880.
            All symbols and lines have the same meaning as Figure \ref{fig:225_-40_snr_sig_scaling}.}
   \label{fig:9880_snr_sig_scaling}
 \end{figure}
@@ -389,7 +403,7 @@ It could in fact be the case that the quoted coadd astrometric uncertainties are
 On the other hand, while the \citet{King:1983aa} scaling law is good (cf. Figure \ref{fig:225_-40_snr_sig_scaling}), with all \texttt{Source} table pointings producing strong agreement, \texttt{Object} table tract analyses only show good agreement for their brightest detections.
 The analysis performed on the merged-tract data suggests that the relationship between pipeline-quoted and ``scatter-based'' uncertainties holds across the whole sky, if one takes SNR to be the ``true'' parameter of pipeline performance.
 Here, we then see a breakdown between quoted precision and SNR -- cf. the increasingly large inter-centile ranges in Figure \ref{fig:ind_sig-sig_merged_object}, additionally demonstrated in Figure \ref{fig:9880_snr_sig_scaling}.
-Unlike the \texttt{Source} table relationship (Figure \ref{fig:225_-40_snr_sig_scaling}), the \texttt{Object} table covariances deviate from the theoretical scaling law lower than an SNR of roughly 50 ($i \approx 23.5$).
+Unlike the \texttt{Source} table relationship (Figure \ref{fig:225_-40_snr_sig_scaling}), the \texttt{Object} table covariances deviate from the theoretical scaling law lower than an SNR of roughly 50 (log$_{10}$(1/SNR) $\approx$ -1.7; $i \approx 23.5$).
 So while we caution against blind faith in the conclusions drawn, and suggest independent verification of the two potential causes of \texttt{Object} table astrometry tension, we tentatively suggest that SNR may be the ``tiebreaker'' which confirms the covariances as being the parameter that is incorrectly determined.
 
 \subsection{Comparison with \citet{Ivezic2019} Predictions}
@@ -408,12 +422,17 @@ The positions of ensembles of objects with similar properties (magnitude, SNR, l
 From this we obtain astrometric precisions as determined by the scatter of measured positions, to which we can compare the precisions of the objects as given by the pipeline-produced catalogue.
 We investigate both isolated best-fit precisions and a parameterisation for the scaling relation that involves a missing systematic uncertainty, $n$, and a multiplicative scaling factor for the quoted uncertainty, $m$.
 
-For the \texttt{Source} table, we find that $m \approx 1$ across most of the sky, but suggest that for the brightest objects an approximately 0.005 arcsec (5 mas) systematic precision be added in quadrature, such that the precisions of these objects then match the scatter in measured positions.
-However, we are currently unable to report confident results for the \texttt{Object} table as our best-fit precisions are in disagreement with both quoted precisions and any reasonable model for scaling relation.
+For the \texttt{Source} table, we find that $m \approx 1$ across most of the sky, but find that for the brightest objects there is an approximately 0.005 arcsec (5 mas) systematic precision that needs to be added in quadrature to the pipeline's quoted uncertainties to match the scatter in measured positions.
+However, for the \texttt{Object} table our measured precisions are in disagreement with both quoted precisions and any reasonable model for scaling relation with magnitude or SNR.
 Instead we find a power-law dependency between scatter-based precision and pipeline-derived covariance, with an exponential of $b \approx 0.75$.
+The upshot of this power-law scaling is that pipeline uncertainties are too large, larger than the scatter of measured positions away from truth, at faint magnitudes, but too small at intermediate magnitudes.
 We find a tentative sub-milliarcsecond systematic precision needed for the brightest detections in coadded images.
 
 Finally, we investigate a few other relationships the data can verify, such as between SNR and magnitude or SNR and statistical astrometric precision, all of which appear to be robust and produce characteristic values, such as the quality of the seeing in the images, that are sensible.
+
+\section{Acknowledgements}
+This paper makes use of LSST Science Pipelines software developed by the Vera C. Rubin Observatory. We thank the Rubin Observatory for making their code available as free software at https://pipelines.lsst.io \citep{NDVRO2025,Jenness2022}.
+It also uses the \texttt{numpy} \citep{Harris2020}, \texttt{astropy} \citep{2013A&A...558A..33A,2018AJ....156..123A}, \texttt{scipy} \citep{scipy}, \texttt{matplotlib} \citep{matplotlib}, \texttt{pandas} \citep{mckinney-proc-scipy-2010-pandas}, and \texttt{healpy} \citep{Zonca2019,2005ApJ...622..759G} softwares.
 
 \appendix
 % Include all the relevant bib files.
