@@ -5,3 +5,7 @@
 #
 # Example:
 #   MIA:Missing In Action
+
+RA:Right Ascension
+Dec:Declination
+OR3:Operations Rehearsal 3

@@ -3,23 +3,26 @@
 .. image:: https://github.com/lsst-sitcom/sitcomtn-159/workflows/CI/badge.svg
    :target: https://github.com/lsst-sitcom/sitcomtn-159/actions/
 
-##############################################################################################################################
-Investigations into the Accuracy and Precision of Astrometric Positions and Covariances of Rubin's Operations Rehearsal 3 Data
-##############################################################################################################################
+#########################################################################################################################################################
+Determining the Accuracy and Precision of Astrometric Positions and Covariances from the LSST Science Pipelines Using Rubin's Operations Rehearsal 3 Data
+#########################################################################################################################################################
 
 SITCOMTN-159
 ============
 
-In this work we carry out an initial investigation into the LSST Pipelines astrometric accuracy and precision.
-For each of the available simulated tracts in Operations Rehearsal 3, we create distributions of nearest-neighbour match on-sky separations for narrow windows of magnitude, pipeline-derived astrometric precision, and (where appropriate) on-sky source density.
-For a series of such cross-matches -- looping through a range of magnitudes and hence signal-to-noise ratios -- for the \texttt{Source} table, single-visit detections, we derive best-fit parameters such that we can correct the astrometric uncertainties to best match the separation distributions.
-Fitting for both a systematic uncertainty $n$, to be added in quadrature to the pipeline uncertainty, and a multiplicative scaling factor for the quoted precisions $m$, we find, globally, that scaling factors are reasonable (and hence $m \approx 1\pm0.1$), while a systematic astrometric uncertainty of $n$ in the range 0.003-0.007 arcsec (3-7 mas) is necessary, with a weak decreasing relationship with increasing field density.
-This suggests that at fainter magnitudes (lower signal-to-noise ratios) the pipeline is correctly modelling all contributions to astrometric uncertainty, and that the deviations from ``true'' position are accurately reflected in the corresponding confidence in the measured position.
-On the other hand, for the very brightest objects a small -- but significant relative to the statistical uncertainty -- astrometric precision is not being recovered, from sources such as the global World Coordinate System solution, missing sources of noise not being propagated through the full pipeline, and so on.
-For \texttt{Object} table, coadded image detections, this simple scaling relation does not hold.
-Instead we find a power-law fit between pipeline-derived and best-fit astrometric precisions, with a power-law slope of approximately 0.75, the origin of which we are unable to explain easily.
-Combining all simulated pointings we find a very tentative sub-arcsecond (0.6 mas) systematic plateauing astrometric precision for the Operations Rehearsal \texttt{Object} tables.
-We however caution that these results are relatively limited, due to the nature of the simulated fields chosen as part of the Operations Rehearsal, and that further investigations on ``real'' commissioning data -- including fields with a higher density of (stellar) objects -- will be necessary to determine the universality of these conclusions.
+We carry out an investigation into the veracity of the astrometric uncertainties calculated by the LSST pipeline.   
+We use the Operations Rehearsal 3 dataset, and thus our results study the effect of the pipeline alone.  
+Whilst there are regimes in which the pipeline astrometric uncertainties are a good estimate of the true uncertainty, there are also regimes in which they are underestimated, and one regime where they are overestimated.
+
+Our analysis is based on creating distributions of separations between detections in the simulation's truth table and their counterparts in the pipeline's data tables for narrow windows of magnitude, pipeline-derived astrometric precision, and (where appropriate) on-sky source density.
+From these distributions we can derive the actual uncertainties in these windows, and hence derive relationships between our measured uncertainties, and those provided by the pipeline.
+For the Source table, single-visit detections we find there is a systematic uncertainty of 0.003-0.007 arcsec (3-7 mas) which has to be added in quadrature to the pipeline uncertainty, with a weak decreasing relationship with increasing field density.
+This suggests that at fainter magnitudes (lower signal-to-noise ratios) the pipeline is correctly modelling all contributions to astrometric uncertainty, and that the deviations from "true" position are accurately reflected in the corresponding confidence in the measured position.
+For the very brightest objects a small -- but significant relative to the statistical uncertainty -- source of astrometric noise is not being included in the pipeline uncertainties, perhaps from sources such as the global World Coordinate System solution, or missing sources of noise not being propagated through the full pipeline.
+On the other hand, for Object table, coadded image detections, this simple model does not hold.
+Instead we find a power-law relationship between pipeline-derived and measured astrometric precisions, with a power-law slope of approximately 0.75, the origin of which we are unable to explain easily.
+Combining all simulated pointings, we find a very tentative sub-arcsecond (0.6 mas) plateau of best-achieved astrometric precision for Operations Rehearsal 3 Object tables.
+We however caution that these results are relatively limited, due to the nature of the simulated fields chosen for the Operations Rehearsal, and that further investigations on "real" commissioning data -- including fields with a higher density of (stellar) objects -- will be necessary to determine the universality of these conclusions.
 
 Links
 =====
